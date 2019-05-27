@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!--HTTP is totally vulnerable - any one can change content/header, inject malware script...
+  HTTPS ensure that no one can change HTTP content, header, etc...-->
+  <Match>
+     <Class name="org.beigesoft.web.WReport" />
+     <Bug pattern="HRS_REQUEST_PARAMETER_TO_HTTP_HEADER" />
+  </Match>
+</FindBugsFilter>
