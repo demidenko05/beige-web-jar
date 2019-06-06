@@ -43,10 +43,11 @@ import org.beigesoft.exc.ExcCode;
 import org.beigesoft.fct.IFctApp;
 import org.beigesoft.log.ILog;
 import org.beigesoft.hnd.IHndRq;
+import org.beigesoft.hnd.IHndFlRpRq;
 
 /**
- * <p>Generic servlet that passes response output stream to request handler
- * as "htmOus" variable in request vars. It's for PDF, CSV, etc. responces.</p>
+ * <p>Generic servlet that passes response output stream to file reporter
+ * request handler. It's for PDF, CSV, etc. responces.</p>
  * @author Yury Demidenko
  */
 @SuppressWarnings("serial")
@@ -73,18 +74,26 @@ public class WReport extends HttpServlet {
   private String fileEx;
 
   /**
-   * <p>Request handlers names.</p>
+   * <p>File reporter handler name.</p>
+   **/
+  private String hndNm;
+
+  /**
+   * <p>Request basic first handlers names.</p>
    **/
   private final List<String> hndNms = new ArrayList<String>();
 
   @Override
   public final void init() throws ServletException {
+    this.hndNm = getInitParameter("hndNm");
     this.logNm = getInitParameter("logNm");
     this.contTy = getInitParameter("contTy");
     this.fileEx = getInitParameter("fileEx");
     String hndNmsStr = getInitParameter("hndNms");
-    for (String hn : hndNmsStr.split(",")) {
-      this.hndNms.add(hn);
+    if (hndNmsStr != null) {
+      for (String hn : hndNmsStr.split(",")) {
+        this.hndNms.add(hn);
+      }
     }
     this.fctApp = (IFctApp) getServletContext().getAttribute("IFctApp");
   }
@@ -119,15 +128,15 @@ public class WReport extends HttpServlet {
     if (fileNm == null || "".equals(fileNm)) {
       fileNm = "data";
     }
-    pResp.setHeader("Content-Disposition", "attachment; filename="
-      + fileNm + "." + this.fileEx);
+    if (this.fileEx == null) { //to prevent downloading (preview) leave it null
+      pResp.setHeader("Content-Disposition", "attachment; filename="
+        + fileNm + "." + this.fileEx);
+    }
     OutputStream htmOus = null;
     try {
-      htmOus = pResp.getOutputStream();
       HttpReqDt rqDt = new HttpReqDt(pReq, pResp);
       rqDt.setAttr("rvs", rqVs);
       rqVs.put("rqDt", rqDt);
-      rqVs.put("htmOus", htmOus);
       for (String hn : this.hndNms) {
         IHndRq hnd = (IHndRq) this.fctApp.laz(rqVs, hn);
         hnd.handle(rqVs, rqDt);
@@ -137,6 +146,15 @@ public class WReport extends HttpServlet {
           rqDt.remAttr("srvlRd");
           pResp.sendRedirect(pReq.getContextPath() + srvlRd);
         }
+      }
+      htmOus = pResp.getOutputStream();
+      IHndFlRpRq hnd = (IHndFlRpRq) this.fctApp.laz(rqVs, this.hndNm);
+      hnd.handle(rqVs, rqDt, htmOus);
+      //any handler can set redirect servlet, e.g. first handler spam redir:
+      String srvlRd = (String) rqDt.getAttr("srvlRd");
+      if (srvlRd != null) {
+        rqDt.remAttr("srvlRd");
+        pResp.sendRedirect(pReq.getContextPath() + srvlRd);
       }
     } catch (Exception e) {
       if (this.fctApp != null) {
