@@ -128,7 +128,7 @@ public class WReport extends HttpServlet {
     if (fileNm == null || "".equals(fileNm)) {
       fileNm = "data";
     }
-    if (this.fileEx == null) { //to prevent downloading (preview) leave it null
+    if (this.fileEx != null) { //to preview (prevent downloading) leave it null
       pResp.setHeader("Content-Disposition", "attachment; filename="
         + fileNm + "." + this.fileEx);
     }
