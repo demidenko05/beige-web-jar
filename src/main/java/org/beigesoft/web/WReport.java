@@ -44,6 +44,7 @@ import org.beigesoft.fct.IFctApp;
 import org.beigesoft.log.ILog;
 import org.beigesoft.hnd.IHndRq;
 import org.beigesoft.hnd.IHndFlRpRq;
+import org.beigesoft.rdb.IOrm;
 
 /**
  * <p>Generic servlet that passes response output stream to file reporter
@@ -171,8 +172,14 @@ public class WReport extends HttpServlet {
       }
       if (e instanceof ExcCode) {
         ExcCode ec = (ExcCode) e;
-        pReq.setAttribute("error_code", ec.getCode());
-        pReq.setAttribute("short_message", ec.getShMsg());
+        if (ec.getCode() == ExcCode.WRPR || ec.getCode() == ExcCode.BUSY
+          || ec.getCode() == IOrm.DRTREAD) {
+          pReq.setAttribute("error_code", ec.getCode());
+          pReq.setAttribute("short_message", ec.getShMsg());
+        } else {
+          pReq.setAttribute("error_code",
+            HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
       } else {
         pReq.setAttribute("error_code",
           HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
