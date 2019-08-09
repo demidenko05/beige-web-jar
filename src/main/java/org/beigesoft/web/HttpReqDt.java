@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.beigesoft.mdl.IReqDt;
+import org.beigesoft.mdl.Cokie;
 
 /**
  * <p>Wrapper (adapter) of HttpServletRequest/HttpServletResponse.</p>
@@ -84,7 +85,6 @@ public class HttpReqDt implements IReqDt {
   public final String[] getParamVls(final String pParamName) {
     return httpReq.getParameterValues(pParamName);
   }
-
 
   /**
    * <p>Getter for Parameters Map.</p>
@@ -165,6 +165,25 @@ public class HttpReqDt implements IReqDt {
   @Override
   public final void remAttr(final String pAttrName) {
     httpReq.removeAttribute(pAttrName);
+  }
+
+  /**
+   * <p>Getter for cookies.</p>
+   * @return Cokie[]
+   **/
+  public final Cokie[] getCookies() {
+    if (this.httpReq.getCookies() == null) {
+      return null;
+    }
+    Cokie[] cokies = new Cokie[this.httpReq.getCookies().length];
+    int i = 0;
+    for (Cookie q : this.httpReq.getCookies()) {
+      Cokie c = new Cokie();
+      c.setNme(q.getName());
+      c.setVal(q.getValue());
+      cokies[i++] = c;
+    }
+    return cokies;
   }
 
   /**
