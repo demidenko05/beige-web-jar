@@ -177,18 +177,18 @@
     <dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>javax.mail</artifactId>
-      <version>1.5.6</version>
+      <version>1.6.2</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <version>3.0.1</version>
+      <version>3.1.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
      <groupId>junit</groupId>
      <artifactId>junit</artifactId>
-     <version>4.10</version>
+     <version>4.13</version>
      <scope>test</scope>
     </dependency>
   </dependencies>
